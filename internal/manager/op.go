@@ -10,7 +10,7 @@ func (m *Manager) BuildAll() {
 	for _, mod := range m.Mods {
 		zipName := mod.GetZipString()
 
-		fmt.Println("make archive:", zipName)
+		fmt.Printf("|> build release [%s]\n\t --- archive: %s\n", mod.Info.Name, zipName)
 
 		err := mod.Info.ToZip(mod.Dir, m.TargetDir)
 
@@ -18,6 +18,6 @@ func (m *Manager) BuildAll() {
 			panic(err)
 		}
 
-		fmt.Printf("make archive: moved to -> [%s]\n", m.TargetDir)
+		fmt.Printf("\t --- location: [%s]\n", m.TargetDir)
 	}
 }

@@ -79,7 +79,7 @@ func (fmi *FactorioModInfo) ToZip(from, to string) error {
 	w := zip.NewWriter(archive)
 	defer w.Close()
 
-	if err := addFilesToZip(w, from, ""); err != nil {
+	if err := addFilesToZip(w, from, fmi.Name); err != nil {
 		return err
 	}
 
@@ -92,12 +92,14 @@ func (fmi *FactorioModInfo) ToZip(from, to string) error {
 
 func addFilesToZip(w *zip.Writer, basePath, baseInZip string) error {
 	files, err := os.ReadDir(basePath)
+
 	if err != nil {
 		return err
 	}
 
 	for _, file := range files {
 		fullfilepath := filepath.Join(basePath, file.Name())
+
 		if _, err := os.Stat(fullfilepath); os.IsNotExist(err) {
 			// ensure the file exists. For example a symlink pointing to a non-existing location might be listed but not actually exist
 			continue
@@ -114,14 +116,19 @@ func addFilesToZip(w *zip.Writer, basePath, baseInZip string) error {
 			}
 		} else if file.Type().IsRegular() {
 			dat, err := os.ReadFile(fullfilepath)
+
 			if err != nil {
 				return err
 			}
+
 			f, err := w.Create(filepath.Join(baseInZip, file.Name()))
+
 			if err != nil {
 				return err
 			}
+
 			_, err = f.Write(dat)
+
 			if err != nil {
 				return err
 			}
