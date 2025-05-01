@@ -65,13 +65,13 @@ func GetInfoFrom(path string) (*FactorioModInfo, error) {
 	return info, nil
 }
 
-func (fmi *FactorioModInfo) ToZip(from, to string) (uint64, error) {
+func (fmi *FactorioModInfo) ToZip(from, to string) (original uint64, compressed uint64, err error) {
 	fpath := filepath.Join(to, fmi.ToZipName())
 
 	archive, err := os.Create(fpath)
 
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
 	defer archive.Close()
@@ -82,14 +82,20 @@ func (fmi *FactorioModInfo) ToZip(from, to string) (uint64, error) {
 	total, err := addFilesToZip(w, from, fmi.Name)
 
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
 	if err := w.Close(); err != nil {
-		return 0, errors.New("Warning: closing zipfile writer failed: " + err.Error())
+		return 0, 0, errors.New("Warning: closing zipfile writer failed: " + err.Error())
 	}
 
-	return total, nil
+	info, err := archive.Stat()
+
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return total, uint64(info.Size()), nil
 }
 
 func addFilesToZip(w *zip.Writer, basePath, baseInZip string) (uint64, error) {

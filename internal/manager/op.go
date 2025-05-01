@@ -16,13 +16,13 @@ func (m *Manager) BuildAll() {
 
 		fmt.Printf("|> build release [%s]\n\t --- archive: %s\n", mod.Info.Name, zipName)
 
-		total, err := mod.Info.ToZip(mod.Dir, m.TargetDir)
+		originalByteCount, compressedByteCount, err := mod.Info.ToZip(mod.Dir, m.TargetDir)
 
 		if err != nil {
 			panic(err)
 		}
 
-		fmt.Printf("\t --- size: %s\n", humanize.Bytes(total))
+		fmt.Printf("\t --- size: %s -> %s\n", humanize.Bytes(originalByteCount), humanize.Bytes(compressedByteCount))
 		fmt.Printf("\t --- location: [%s]\n", m.TargetDir)
 	}
 }
