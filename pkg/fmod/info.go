@@ -65,13 +65,13 @@ func GetInfoFrom(path string) (*FactorioModInfo, error) {
 	return info, nil
 }
 
-func (fmi *FactorioModInfo) ToZip(from, to string) error {
+func (fmi *FactorioModInfo) ToZip(from, to string) (uint64, error) {
 	fpath := filepath.Join(to, fmi.ToZipName())
 
 	archive, err := os.Create(fpath)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	defer archive.Close()
@@ -79,22 +79,26 @@ func (fmi *FactorioModInfo) ToZip(from, to string) error {
 	w := zip.NewWriter(archive)
 	defer w.Close()
 
-	if err := addFilesToZip(w, from, fmi.Name); err != nil {
-		return err
+	total, err := addFilesToZip(w, from, fmi.Name)
+
+	if err != nil {
+		return 0, err
 	}
 
 	if err := w.Close(); err != nil {
-		return errors.New("Warning: closing zipfile writer failed: " + err.Error())
+		return 0, errors.New("Warning: closing zipfile writer failed: " + err.Error())
 	}
 
-	return nil
+	return total, nil
 }
 
-func addFilesToZip(w *zip.Writer, basePath, baseInZip string) error {
+func addFilesToZip(w *zip.Writer, basePath, baseInZip string) (uint64, error) {
+	total := uint64(0)
+
 	files, err := os.ReadDir(basePath)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	for _, file := range files {
@@ -111,30 +115,37 @@ func addFilesToZip(w *zip.Writer, basePath, baseInZip string) error {
 		}
 
 		if file.IsDir() {
-			if err := addFilesToZip(w, fullfilepath, filepath.Join(baseInZip, file.Name())); err != nil {
-				return err
+			dirTotal, err := addFilesToZip(w, fullfilepath, filepath.Join(baseInZip, file.Name()))
+
+			if err := err; err != nil {
+				return 0, err
 			}
+
+			total += dirTotal
 		} else if file.Type().IsRegular() {
 			dat, err := os.ReadFile(fullfilepath)
 
 			if err != nil {
-				return err
+				return 0, err
 			}
 
 			f, err := w.Create(filepath.Join(baseInZip, file.Name()))
 
 			if err != nil {
-				return err
+				return 0, err
 			}
 
-			_, err = f.Write(dat)
+			file_total, err := f.Write(dat)
 
 			if err != nil {
-				return err
+				return 0, err
 			}
+
+			total += uint64(file_total)
 		} else {
 			// we ignore non-regular files because they are scary
 		}
 	}
-	return nil
+
+	return total, nil
 }
