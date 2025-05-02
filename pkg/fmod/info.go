@@ -110,7 +110,6 @@ func addFilesToZip(w *zip.Writer, basePath, baseInZip string) (uint64, error) {
 	for _, file := range files {
 		fullfilepath := filepath.Join(basePath, file.Name())
 
-		// fmt.Println(fullfilepath, "  ->  ", filepath.ToSlash(fullfilepath))
 		fullfilepath = filepath.ToSlash(fullfilepath)
 
 		if _, err := os.Stat(fullfilepath); os.IsNotExist(err) {
