@@ -1,6 +1,9 @@
 # Description
 
-Simple tool to build mod archive.
+Simple tool to build Factorio mod archive.
+
+The archive name will be generated from your info.json file with template `{mod_name}_{mod_version}.zip`.
+The archive is compatible with game mod structure and can be placed directly to Factorio mods folder.
 
 # Installing
 
@@ -29,7 +32,7 @@ goft -b
 #           |                    | - xxx
 goft -b mod_base mod_resource mod_extra
 
-# build mod and generate zip file not in current working directory
+# build mod and generate zip file not in the current working directory
 goft -o /path/to/factorio/mods -b mod_base
 
 ```
